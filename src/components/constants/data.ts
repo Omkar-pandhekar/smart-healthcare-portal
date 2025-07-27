@@ -8,7 +8,7 @@ export const navigationLinks = [
     id: 1,
 
     name: "Hospitals",
-    link: "/gallery",
+    link: "/search",
   },
   {
     id: 2,

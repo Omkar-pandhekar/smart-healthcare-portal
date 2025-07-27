@@ -9,7 +9,6 @@ import {
   Clock,
   Users,
   CheckCircle,
-  XCircle,
   AlertCircle,
   DollarSign,
   TrendingUp,
@@ -29,6 +28,12 @@ interface RecentAppointment {
   user: {
     fullname: string;
     email: string;
+  };
+  doctor: {
+    name: string;
+    email: string;
+    specialization: string;
+    consultationFees: number;
   };
   date: string;
   time: string;
@@ -105,8 +110,14 @@ const OverviewPage = () => {
           appointments.map((apt: any) => apt.user?._id || apt.user)
         );
 
-        // Calculate earnings (assuming $50 per completed appointment)
-        const earnings = completedAppts.length * 50;
+        // Calculate earnings based on consultation fees
+        const earnings = completedAppts.reduce((total: number, apt: any) => {
+          // Only count paid appointments
+          if (apt.paymentStatus === "paid") {
+            return total + (apt.doctor?.consultationFees || 50); // Default to $50 if not set
+          }
+          return total;
+        }, 0);
 
         setStats({
           totalAppointments: appointments.length,
@@ -194,25 +205,12 @@ const OverviewPage = () => {
     },
     {
       title: "Total Earnings",
-      value: `$${stats.totalEarnings}`,
+      value: `Rs.${stats.totalEarnings}`,
       icon: DollarSign,
       color: "text-emerald-600",
       bgColor: "bg-emerald-100",
     },
   ];
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case "confirmed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case "cancelled":
-        return <XCircle className="w-4 h-4 text-red-500" />;
-      case "completed":
-        return <CheckCircle className="w-4 h-4 text-blue-500" />;
-      default:
-        return <AlertCircle className="w-4 h-4 text-yellow-500" />;
-    }
-  };
 
   const getStatusColor = (status: string) => {
     switch (status) {

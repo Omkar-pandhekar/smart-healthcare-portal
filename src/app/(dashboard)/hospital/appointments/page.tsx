@@ -31,7 +31,7 @@ interface Appointment {
     email: string;
   };
   doctor: {
-    fullname: string;
+    name: string;
     email: string;
     specialization: string;
   };
@@ -124,7 +124,7 @@ const HospitalAppointmentsPage = () => {
 
       setAppointments(sortedAppointments);
       setFilteredAppointments(sortedAppointments);
-    } catch (err) {
+    } catch {
       setError("Failed to fetch appointments");
     } finally {
       setLoading(false);
@@ -143,12 +143,18 @@ const HospitalAppointmentsPage = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (apt) =>
-          apt.user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          apt.user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          apt.doctor.fullname
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase()) ||
-          apt.doctor.email.toLowerCase().includes(searchTerm.toLowerCase())
+          (apt.user?.fullname?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          ) ||
+          (apt.user?.email?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          ) ||
+          (apt.doctor?.name?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          ) ||
+          (apt.doctor?.email?.toLowerCase() || "").includes(
+            searchTerm.toLowerCase()
+          )
       );
     }
 
@@ -387,10 +393,11 @@ const HospitalAppointmentsPage = () => {
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-medium">
-                            Dr. {appointment.doctor.fullname}
+                            Dr. {appointment.doctor?.name || "Unknown Doctor"}
                           </span>
                           <span className="text-sm text-gray-500">
-                            {appointment.doctor.specialization}
+                            {appointment.doctor?.specialization ||
+                              "General Medicine"}
                           </span>
                         </div>
                       </TableCell>

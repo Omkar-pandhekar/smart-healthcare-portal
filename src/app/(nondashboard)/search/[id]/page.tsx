@@ -13,21 +13,28 @@ import {
   Briefcase,
   ArrowRight,
 } from "lucide-react";
-import dynamic from "next/dynamic";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import DatePicker from "@/components/common/DatePicker";
-
-const DynamicMap = dynamic(() => import("../Map"), { ssr: false });
+import { RatingDisplay } from "@/components/ui/rating";
+import { RatingDialog } from "@/components/ui/rating-dialog";
+import { useSession } from "next-auth/react";
 
 interface Hospital {
   _id?: string;
@@ -44,6 +51,8 @@ interface Hospital {
   email?: string;
   website?: string;
   images?: string[];
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 interface Doctor {
@@ -57,6 +66,7 @@ interface Doctor {
 const HospitalDetailPage = () => {
   const params = useParams();
   const router = useRouter();
+  const { data: session } = useSession();
   const id = params?.id as string;
   const [hospital, setHospital] = useState<Hospital | null>(null);
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -68,9 +78,19 @@ const HospitalDetailPage = () => {
   const [appointmentTime, setAppointmentTime] = useState<string>("");
   const [patientName, setPatientName] = useState<string>("");
   const [patientEmail, setPatientEmail] = useState<string>("");
+  const [appointmentType, setAppointmentType] = useState<string>("in-person");
   const [submitting, setSubmitting] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
   const [formError, setFormError] = useState("");
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+
+  // Populate patient info from session
+  useEffect(() => {
+    if (session?.user) {
+      setPatientName(session.user.name || "");
+      setPatientEmail(session.user.email || "");
+    }
+  }, [session]);
 
   useEffect(() => {
     if (!id) return;
@@ -128,18 +148,21 @@ const HospitalDetailPage = () => {
     setSubmitting(true);
     setFormError("");
     setSuccessMsg("");
-    // Simple validation
+
+    // Validation
     if (
       !selectedDoctor ||
       !appointmentDate ||
       !appointmentTime ||
       !patientName ||
-      !patientEmail
+      !patientEmail ||
+      !appointmentType
     ) {
       setFormError("Please fill all fields.");
       setSubmitting(false);
       return;
     }
+
     try {
       const res = await fetch("/api/appointment/book", {
         method: "POST",
@@ -150,16 +173,20 @@ const HospitalDetailPage = () => {
           time: appointmentTime,
           patientName,
           patientEmail,
+          type: appointmentType,
         }),
       });
       const data = await res.json();
       if (res.ok && data.success) {
         setSuccessMsg("Appointment booked successfully!");
         setDialogOpen(false);
+        // Reset form
         setAppointmentDate("");
         setAppointmentTime("");
         setPatientName("");
         setPatientEmail("");
+        setAppointmentType("in-person");
+        setSelectedDoctor("");
       } else {
         setFormError(data.error || "Failed to book appointment");
       }
@@ -184,9 +211,31 @@ const HospitalDetailPage = () => {
               <h2 className="text-3xl font-bold text-white mb-1 drop-shadow">
                 {hospital.name}
               </h2>
-              <div className="flex items-center gap-2 text-gray-200 text-base">
-                <MapPin className="w-5 h-5" />
-                <span>{address}</span>
+              <div className="flex items-center gap-4 text-gray-200 text-base">
+                <div className="flex items-center gap-2">
+                  <MapPin className="w-5 h-5" />
+                  <span>{address}</span>
+                </div>
+                {hospital.averageRating && hospital.averageRating > 0 && (
+                  <div className="flex items-center gap-2">
+                    <RatingDisplay
+                      value={hospital.averageRating}
+                      totalRatings={hospital.totalRatings}
+                      size="sm"
+                      className="text-white"
+                    />
+                  </div>
+                )}
+                {session?.user && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setRatingDialogOpen(true)}
+                    className="bg-white/10 border-white/20 text-white hover:bg-white/20"
+                  >
+                    Rate Hospital
+                  </Button>
+                )}
               </div>
             </div>
           </ImagesSlider>
@@ -322,46 +371,125 @@ const HospitalDetailPage = () => {
                       onSubmit={handleAppointmentSubmit}
                       className="space-y-4 mt-2"
                     >
-                      <Input
-                        type="text"
-                        placeholder="Your Name"
-                        value={patientName}
-                        onChange={(e) => setPatientName(e.target.value)}
-                        required
-                      />
-                      <Input
-                        type="email"
-                        placeholder="Your Email"
-                        value={patientEmail}
-                        onChange={(e) => setPatientEmail(e.target.value)}
-                        required
-                      />
-                      <DatePicker
-                        value={appointmentDate}
-                        onChange={setAppointmentDate}
-                        label="Date"
-                        required
-                      />
-                      <Input
-                        type="time"
-                        placeholder="Time"
-                        value={appointmentTime}
-                        onChange={(e) => setAppointmentTime(e.target.value)}
-                        required
-                      />
+                      <div>
+                        <Label className="block mb-1 font-medium">Doctor</Label>
+                        <Select
+                          value={selectedDoctor}
+                          onValueChange={setSelectedDoctor}
+                        >
+                          <SelectTrigger className="w-full border px-3 py-2 rounded">
+                            <SelectValue placeholder="Select a doctor" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {doctors.map((doc: any) => (
+                              <SelectItem key={doc._id} value={doc._id}>
+                                {doc.name} ({doc.specialization || "Doctor"})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div>
+                        <Label className="block mb-1 font-medium">
+                          Your Name
+                        </Label>
+                        <Input
+                          type="text"
+                          placeholder="Your Name"
+                          value={patientName}
+                          onChange={(e) => setPatientName(e.target.value)}
+                          className="w-full border px-3 py-2 rounded bg-gray-50"
+                          required
+                          readOnly
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          From your account
+                        </p>
+                      </div>
+
+                      <div>
+                        <Label className="block mb-1 font-medium">
+                          Your Email
+                        </Label>
+                        <Input
+                          type="email"
+                          placeholder="Your Email"
+                          value={patientEmail}
+                          onChange={(e) => setPatientEmail(e.target.value)}
+                          className="w-full border px-3 py-2 rounded bg-gray-50"
+                          required
+                          readOnly
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          From your account
+                        </p>
+                      </div>
+
+                      <div>
+                        <DatePicker
+                          value={appointmentDate}
+                          onChange={setAppointmentDate}
+                          label="Appointment Date"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="block mb-1 font-medium">Time</Label>
+                        <Input
+                          type="time"
+                          value={appointmentTime}
+                          onChange={(e) => setAppointmentTime(e.target.value)}
+                          className="w-full border px-3 py-2 rounded"
+                          required
+                        />
+                      </div>
+
+                      <div>
+                        <Label className="block mb-1 font-medium">
+                          Appointment Type
+                        </Label>
+                        <Select
+                          value={appointmentType}
+                          onValueChange={setAppointmentType}
+                        >
+                          <SelectTrigger className="w-full border px-3 py-2 rounded">
+                            <SelectValue placeholder="Select type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="in-person">In-person</SelectItem>
+                            <SelectItem value="telemedicine">
+                              Telemedicine
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
                       {formError && (
                         <div className="text-red-600 text-sm">{formError}</div>
                       )}
-                      <DialogFooter>
-                        <Button type="submit" disabled={submitting}>
-                          {submitting ? "Booking..." : "Book"}
+
+                      {successMsg && (
+                        <div className="text-green-600 text-sm">
+                          {successMsg}
+                        </div>
+                      )}
+
+                      <div className="flex gap-2 pt-2">
+                        <Button
+                          type="submit"
+                          disabled={submitting}
+                          className="flex-1 bg-blue-600 text-white py-2 rounded font-semibold hover:bg-blue-700 transition"
+                        >
+                          {submitting ? "Booking..." : "Book Appointment"}
                         </Button>
                         <DialogClose asChild>
                           <Button type="button" variant="outline">
                             Cancel
                           </Button>
                         </DialogClose>
-                      </DialogFooter>
+                      </div>
                     </form>
                   </DialogContent>
                 </Dialog>
@@ -382,6 +510,21 @@ const HospitalDetailPage = () => {
           </div>
         </div>
       )} */}
+
+      {/* Rating Dialog */}
+      {hospital && (
+        <RatingDialog
+          isOpen={ratingDialogOpen}
+          onClose={() => setRatingDialogOpen(false)}
+          targetType="hospital"
+          targetId={hospital._id!}
+          targetName={hospital.name!}
+          onRatingSubmitted={() => {
+            // Refresh hospital data to get updated ratings
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 };

@@ -34,7 +34,7 @@ interface RecentAppointment {
     email: string;
   };
   doctor: {
-    fullname: string;
+    name: string;
     email: string;
     specialization: string;
   };
@@ -367,7 +367,7 @@ const HospitalOverviewPage = () => {
                             appointment.user?.email}
                         </span>
                         <span className="text-sm text-gray-500">
-                          Dr. {appointment.doctor?.fullname} •{" "}
+                          Dr. {appointment.doctor?.name || "Unknown Doctor"} •{" "}
                           {appointment.date} at {appointment.time}
                         </span>
                       </div>

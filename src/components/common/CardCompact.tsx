@@ -2,6 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Building2, MapPin, Phone, Mail, Globe } from "lucide-react";
 import Image from "next/image";
+import { RatingDisplay } from "@/components/ui/rating";
 
 interface CardCompactProps {
   title: string;
@@ -22,6 +23,8 @@ interface CardCompactProps {
   onClick?: () => void;
   className?: string;
   showIcon?: boolean;
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 const CardCompact: React.FC<CardCompactProps> = ({
@@ -32,6 +35,8 @@ const CardCompact: React.FC<CardCompactProps> = ({
   onClick,
   className,
   showIcon = true,
+  averageRating,
+  totalRatings,
 }) => {
   return (
     <div
@@ -65,9 +70,19 @@ const CardCompact: React.FC<CardCompactProps> = ({
         ) : null}
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-1">
-            {title}
-          </h3>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100">
+              {title}
+            </h3>
+            {averageRating && averageRating > 0 && (
+              <RatingDisplay
+                value={averageRating}
+                totalRatings={totalRatings}
+                size="sm"
+                showCount={false}
+              />
+            )}
+          </div>
 
           {subtitle && (
             <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400 text-sm mb-2">

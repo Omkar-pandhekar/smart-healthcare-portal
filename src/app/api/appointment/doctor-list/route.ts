@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
     }
     const appointments = await Appointment.find({ doctor: doctorId })
       .populate("user", "fullname email")
+      .populate("doctor", "name specialization email consultationFees")
       .sort({ date: -1, time: -1 });
     return NextResponse.json({
       success: true,

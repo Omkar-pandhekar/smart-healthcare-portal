@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.850.0",
+    "@aws-sdk/s3-request-presigner": "^3.850.0",
     "@next-auth/mongodb-adapter": "^1.1.3",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-alert-dialog": "^1.1.11",
@@ -53,6 +54,7 @@
     "next-connect": "^1.0.0",
     "next-themes": "^0.4.6",
     "nodemailer": "^6.10.1",
+    "pdf-lib": "^1.17.1",
     "postcss": "^8.5.3",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.3.0",

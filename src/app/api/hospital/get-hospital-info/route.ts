@@ -13,7 +13,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const hospital = await Hospital.findById(_id);
+    const hospital = await Hospital.findById(_id).select({
+      _id: 1,
+      name: 1,
+      address: 1,
+      phone: 1,
+      email: 1,
+      website: 1,
+      images: 1,
+      averageRating: 1,
+      totalRatings: 1,
+    });
     if (!hospital) {
       return NextResponse.json(
         { error: "Hospital not found" },

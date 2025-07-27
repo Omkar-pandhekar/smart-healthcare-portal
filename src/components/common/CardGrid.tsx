@@ -2,6 +2,7 @@ import React from "react";
 import { cn } from "@/lib/utils";
 import { Building2, MapPin, Phone, Mail, Globe } from "lucide-react";
 import Image from "next/image";
+import { RatingDisplay } from "@/components/ui/rating";
 
 interface CardGridProps {
   title: string;
@@ -21,6 +22,8 @@ interface CardGridProps {
   };
   onClick?: () => void;
   className?: string;
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 const CardGrid: React.FC<CardGridProps> = ({
@@ -30,6 +33,8 @@ const CardGrid: React.FC<CardGridProps> = ({
   details,
   onClick,
   className,
+  averageRating,
+  totalRatings,
 }) => {
   return (
     <div
@@ -63,9 +68,19 @@ const CardGrid: React.FC<CardGridProps> = ({
 
       {/* Content Section */}
       <div className="p-4">
-        <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 mb-2 line-clamp-1">
-          {title}
-        </h3>
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className="font-semibold text-lg text-gray-900 dark:text-gray-100 line-clamp-1">
+            {title}
+          </h3>
+          {averageRating && averageRating > 0 && (
+            <RatingDisplay
+              value={averageRating}
+              totalRatings={totalRatings}
+              size="sm"
+              showCount={false}
+            />
+          )}
+        </div>
 
         {subtitle && (
           <div className="flex items-center gap-1 text-gray-600 dark:text-gray-400 text-sm mb-3">

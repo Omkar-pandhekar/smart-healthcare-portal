@@ -7,21 +7,14 @@ export interface IDoctor extends Document {
   specialization: string;
   qualifications: string;
   experience: number;
-  languages: string[];
+  consultationFees: number;
+  phone?: string;
   gender: string;
   profileImage?: string;
-  consultationFees: number;
-  availableSlots: Array<{
-    date: string;
-    slots: string[];
-  }>;
-  ratings: Array<{
-    user: mongoose.Types.ObjectId;
-    rating: number;
-    review: string;
-  }>;
   hospital?: mongoose.Types.ObjectId;
   verificationStatus?: "pending" | "verified" | "rejected";
+  averageRating?: number;
+  totalRatings?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,19 +37,14 @@ const DoctorSchema = new Schema<IDoctor>(
         slots: [String],
       },
     ],
-    ratings: [
-      {
-        user: { type: Schema.Types.ObjectId, ref: "User" },
-        rating: Number,
-        review: String,
-      },
-    ],
     hospital: { type: Schema.Types.ObjectId, ref: "Hospital" },
     verificationStatus: {
       type: String,
       enum: ["pending", "verified", "rejected"],
       default: "pending",
     },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalRatings: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

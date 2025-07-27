@@ -19,6 +19,8 @@ interface Hospital {
   email?: string;
   website?: string;
   images?: string[];
+  averageRating?: number;
+  totalRatings?: number;
 }
 
 type ViewMode = "list" | "grid";
@@ -168,6 +170,8 @@ const Listings: React.FC<ListingsProps> = ({ city }) => {
                 website: hospital.website,
                 address: hospital.address,
               },
+              averageRating: hospital.averageRating,
+              totalRatings: hospital.totalRatings,
               onClick: () =>
                 hospital._id && router.push(`/search/${hospital._id}`),
             };

@@ -22,6 +22,7 @@ import {
   Settings,
   Stethoscope,
   X,
+  Pill,
 } from "lucide-react";
 import { NAVBAR_HEIGHT } from "@/components/constants/data";
 import { cn } from "@/lib/utils";
@@ -40,6 +41,11 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             icon: FileText,
             label: "Appointments",
             href: "/doctor/appointments",
+          },
+          {
+            icon: Pill,
+            label: "Prescriptions",
+            href: "/doctor/prescriptions",
           },
           {
             icon: FolderUp,
@@ -74,6 +80,11 @@ const AppSidebar = ({ userType }: AppSidebarProps) => {
             icon: Calendar,
             label: "Book Appointments",
             href: "/user/appointments",
+          },
+          {
+            icon: Pill,
+            label: "Prescriptions",
+            href: "/user/prescriptions",
           },
           {
             icon: BsChatFill,

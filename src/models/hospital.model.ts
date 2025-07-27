@@ -16,6 +16,8 @@ export interface IHospital extends Document {
   website?: string;
   doctors: mongoose.Types.ObjectId[]; // Array of Doctor IDs
   images?: string[]; // up to 4 image URLs
+  averageRating?: number;
+  totalRatings?: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +46,8 @@ const HospitalSchema = new Schema<IHospital>(
       validate: [(arr) => arr.length <= 4, "Maximum 4 images allowed"],
       default: [],
     },
+    averageRating: { type: Number, default: 0, min: 0, max: 5 },
+    totalRatings: { type: Number, default: 0 },
   },
   { timestamps: true }
 );

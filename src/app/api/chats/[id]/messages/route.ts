@@ -7,7 +7,7 @@ import User from "@/models/user.models";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   await ConnectDB();
   const session = await getServerSession(authOptions);
@@ -18,9 +18,12 @@ export async function POST(
   if (!user) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
+
+  const { id } = await params;
+
   try {
     const { message } = await req.json();
-    const chat = await Chat.findOne({ _id: params.id, userId: user._id });
+    const chat = await Chat.findOne({ _id: id, userId: user._id });
     if (!chat) {
       return NextResponse.json({ error: "Chat not found" }, { status: 404 });
     }

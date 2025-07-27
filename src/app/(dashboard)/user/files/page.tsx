@@ -66,14 +66,15 @@ const UserFilesPage = () => {
     setShareMessage("");
     setShareError("");
     try {
-      const res = await fetch(`/api/files/shared?action=share`, {
+      const res = await fetch(`/api/files/share`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ fileId: shareFile._id, email: shareEmail }),
       });
       const data = await res.json();
-      if (res.ok) {
+      if (res.ok && data.success) {
         setShareMessage("File shared successfully!");
+        setShareEmail("");
       } else {
         setShareError(data.error || "Failed to share file");
       }
