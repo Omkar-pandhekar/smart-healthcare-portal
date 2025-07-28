@@ -9,7 +9,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider";
 
 export const metadata: Metadata = {
   title: "Mental Health Assistant",
-  description: "A social platform for book lovers",
+  description: "Mental Health Assistant",
 };
 
 export default function RootLayout({
@@ -17,7 +17,6 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
   return (
     <html lang="en">
       <AuthProvider>
